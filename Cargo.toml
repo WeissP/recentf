@@ -6,13 +6,25 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-hisfile = {path = "libs/hisfile"}
+# hisfile = {path = "libs/hisfile"}
 pathtrie = {path = "libs/pathtrie"}
-clap = { version = "3.2.3", features = ["derive"] } 
+clap = { version = "4.1", features = ["derive"] } 
 anyhow = "1.0.69"
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+sqlx = { version = "0.6", features = [ "runtime-tokio-rustls" , "postgres"] }
+itertools = "0.10.5"
+
+[lib]
+name = "recentf_lib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "recentf_bin"
+path = "src/bin.rs"
 
 [workspace]
 members = [
-    "libs/hisfile",
+    # "libs/hisfile",
     "libs/pathtrie",
 ]
