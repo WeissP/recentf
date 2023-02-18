@@ -1,8 +1,8 @@
-mod clean;
-mod config;
+pub mod clean;
+pub mod config;
 pub mod database;
 pub mod search;
-mod tramp;
+pub mod tramp;
 use clap::{arg, command, Args, Parser, Subcommand};
 use search::Query;
 use std::{collections::HashMap, path::PathBuf, str::FromStr};

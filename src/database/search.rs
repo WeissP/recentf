@@ -41,9 +41,11 @@ async fn search_without_tramp(
 SELECT fullpath, last_ref, freq, status as "status: Status"
 FROM file
 WHERE tramp_id = 0
+AND deleted = false
 AND status >= 2
 AND dirpath ILIKE all ($1::text[])
 AND filename ILIKE all ($2::text[])
+ORDER BY status
 "#,
         paths,
         names,
@@ -65,11 +67,12 @@ async fn search_with_tramp(
 SELECT tramp_id, fullpath, last_ref, freq, status as "status: Status"
 FROM file INNER JOIN tramp ON file.tramp_id = tramp.id
 WHERE tramp_id != 0
+AND deleted = false
 AND status >= 2
 AND dirpath ILIKE all ($1::text[])
 AND filename ILIKE all ($2::text[])
 AND tramp_prefix ILIKE all ($3::text[])
-ORDER BY tramp.id
+ORDER BY tramp.id, status
 "#,
         paths,
         names,

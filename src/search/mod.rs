@@ -2,6 +2,7 @@ mod candidates;
 use super::tramp;
 use anyhow::{anyhow, Context, Error, Result};
 pub use candidates::{Candidate, Candidates, Status};
+use pathtrie::{node::Node, Tree};
 use std::{collections::HashMap, path::PathBuf, str::FromStr, time::Duration};
 
 pub struct Query {
@@ -41,6 +42,12 @@ pub struct Fmt {
     pub tramp: tramp::Prefix,
 }
 
+impl Default for Fmt {
+    fn default() -> Self {
+        todo!()
+    }
+}
+
 impl Fmt {
     pub fn new(
         indent: &'static str,
@@ -65,6 +72,29 @@ impl Fmt {
     //         "ssh" => format!("[{}] ", self.tramp.id.0),
     //         _ => String::new(),
     //     }
+    // }
+}
+
+impl Candidates {
+    pub fn to_trees<'a>(&'a self) -> Vec<Tree<'a, (), Fmt>> {
+        // self.paths()
+        //     .map(|(id, paths)| Tree {
+        //         root: (&paths).into(),
+        //         fmt: Fmt::default(),
+        //     })
+        //     .collect()
+        todo!()
+    }
+    // pub fn pretty_print(self) -> Result<()> {
+    //     let fmt = Fmt::default();
+    //     let vv = self.sorted_candidates();
+    //     for (id, cs) in vv {
+    //     let mut root: Node<()> = Node::default();
+    //         let paths = cs.iter().map(|x| x.full_path()).collect();
+    //         root.insert(&paths, None);
+    //         Tree{ root, fmt }.print()
+    //     }
+    //     todo!()
     // }
 }
 

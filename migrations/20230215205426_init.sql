@@ -14,15 +14,15 @@ CREATE TABLE file
     filename TEXT not null,  
     last_ref BIGINT not null,
     freq INTEGER not null,
+    deleted BOOL not null,
     status INTEGER not null,
-    --  0:deleted
     --  1:filtered
     --  2:normal
     --  3:favourite
     FOREIGN KEY(tramp_id) REFERENCES tramp(id),
     PRIMARY KEY (tramp_id, fullpath)
   );
-CREATE INDEX tramp_id_index ON file(tramp_id);
+CREATE INDEX file_indicies ON file(deleted, tramp_id, status);
 
 -- We force local files have tramp id 0 for performance optimization 
 INSERT INTO tramp VALUES (0, '');

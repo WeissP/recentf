@@ -1,4 +1,6 @@
 use anyhow::{anyhow, Context, Error, Result};
+use once_cell::sync::OnceCell;
+use pathtrie::Tree;
 use std::{
     cmp::Ordering,
     collections::HashMap,
@@ -6,6 +8,9 @@ use std::{
     str::FromStr,
     time::{Duration, SystemTime},
 };
+
+const DAY: u64 = 60 * 60 * 24;
+
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Candidate {
     status: Status,
@@ -35,7 +40,7 @@ struct LastRef(u64);
 impl PartialEq for LastRef {
     fn eq(&self, other: &Self) -> bool {
         match (self.levels(), other.levels()) {
-            (None, None) => dbg!(self.0 / 604800) == dbg!(other.0 / 604800),
+            (None, None) => dbg!(self.weeks()) == dbg!(other.weeks()),
             (Some(a), Some(b)) => a == b,
             _ => false,
         }
@@ -53,15 +58,23 @@ impl PartialOrd for LastRef {
 }
 
 fn now() -> u64 {
-    match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
-        Ok(n) => n.as_secs(),
-        Err(_) => panic!("SystemTime before UNIX EPOCH!"),
-    }
+    static NOW: OnceCell<u64> = OnceCell::new();
+    NOW.get_or_init(
+        || match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
+            Ok(n) => n.as_secs(),
+            Err(_) => panic!("SystemTime before UNIX EPOCH!"),
+        },
+    )
+    .to_owned()
 }
 
 impl LastRef {
     fn days(&self) -> u64 {
-        (now() - self.0) / (60 * 60 * 24)
+        (now() - self.0) / DAY
+    }
+
+    fn weeks(&self) -> u64 {
+        self.days() / 7
     }
 
     fn levels(&self) -> Option<usize> {
@@ -127,6 +140,22 @@ impl Candidates {
     pub fn get(&self, id: i16) -> Option<&Vec<Candidate>> {
         self.0.get(&id)
     }
+
+    pub fn sort(&mut self) -> () {
+        for (_, cs) in self.0.iter_mut() {
+            cs.sort_unstable()
+        }
+    }
+
+    pub fn paths(&self) -> impl Iterator<Item = (&i16, Vec<&str>)> {
+        self.0
+            .iter()
+            .map(|(id, cs)| (id, cs.iter().map(|x| x.full_path()).collect()))
+    }
+
+//     pub fn paths_segs(&self) -> impl Iterator<Item = (&i16, Vec<&Vec<&str>>)> {
+// todo!()
+// }
 }
 
 #[cfg(test)]
@@ -146,15 +175,15 @@ mod tests {
         assert_eq!(yest, new_last_ref(1, 100));
 
         assert!(today > yest);
-        
+
         let yest_yest = new_last_ref(2, 0);
         let yest_yest_yest = new_last_ref(3, 0);
         assert_eq!(yest_yest, yest_yest_yest);
         assert!(yest_yest_yest > new_last_ref(4, 0));
 
-        let last_month = new_last_ref(30,0);
+        let last_month = new_last_ref(30, 0);
         assert!(yest_yest_yest > last_month);
-        assert_eq!(last_month, new_last_ref(36,0));
-        assert!(last_month > new_last_ref(37,0));
+        assert_eq!(last_month, new_last_ref(34, 0));
+        assert!(last_month > new_last_ref(37, 0));
     }
 }
