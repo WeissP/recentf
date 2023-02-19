@@ -3,8 +3,8 @@ pub mod config;
 pub mod database;
 pub mod search;
 pub mod tramp;
-use clap::{arg, command, Args, Parser, Subcommand};
-use search::Query;
-use std::{collections::HashMap, path::PathBuf, str::FromStr};
+
+
+
 // use hisfile;
-use tramp::TrampPath;
+

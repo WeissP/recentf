@@ -1,12 +1,9 @@
 use crate::{clean::FilterRules, search::SearchOption, tramp::AliasMap};
 use anyhow::{Context, Result};
-use bimap::BiMap;
+
 use once_cell::sync::OnceCell;
 use serde::Deserialize;
-use std::{
-    env,
-    path::{Path, PathBuf},
-};
+use std::{env, path::PathBuf};
 
 #[derive(Deserialize, Debug)]
 pub struct Config {

@@ -1,8 +1,7 @@
 mod alias;
 pub use alias::{Alias, AliasMap, Host};
 use anyhow::{anyhow, Context, Error, Result};
-use bimap::BiBTreeMap;
-use std::{collections::HashMap, fmt::Display, path::PathBuf, str::FromStr};
+use std::{fmt::Display, path::PathBuf, str::FromStr};
 
 /// split tramp_path to tramp_prefix and file_path
 pub fn split(tramp_path: &str) -> (&str, &str) {
@@ -31,12 +30,6 @@ impl FromStr for TrampPath {
 
 #[derive(Clone, Debug)]
 pub struct Prefix(Vec<Piece>);
-
-impl Prefix {
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-}
-}
 
 impl FromStr for Prefix {
     type Err = Error;

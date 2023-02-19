@@ -1,8 +1,8 @@
 use super::Prefix;
-use anyhow::{anyhow, Context, Error, Result};
+
 use bimap::BiBTreeMap;
 use serde::Deserialize;
-use std::fmt::Write;
+
 pub type Alias = String;
 pub type Host = String;
 
@@ -11,17 +11,16 @@ pub type Host = String;
 pub struct AliasMap(BiBTreeMap<Alias, Host>);
 
 impl AliasMap {
-    pub fn matched_hosts<'a, 'b>(&'a self, alias: &'b str) -> Vec<&'a str> {
+    pub fn matched_host<'a, 'b>(&'a self, alias: &'b str) -> Option<&'a str> {
         self.0
             .iter()
-            .flat_map(|(k, v)| {
+            .find_map(|(k, v)| {
                 if k.contains(alias) {
                     Some(v.as_str())
                 } else {
                     None
                 }
             })
-            .collect()
     }
 }
 

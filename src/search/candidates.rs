@@ -1,19 +1,12 @@
-use anyhow::{anyhow, Context, Error, Result};
+use crate::config::config;
+use anyhow::{anyhow, Result};
 use once_cell::sync::OnceCell;
 use pathtrie::Tree;
-use std::{
-    cmp::Ordering,
-    collections::HashMap,
-    fmt::Display,
-    path::{Path, PathBuf},
-    str::FromStr,
-    time::{Duration, SystemTime},
-};
-
-use crate::tramp;
+use std::{cmp::Ordering, collections::HashMap, fmt::Display, path::Path, time::SystemTime};
 
 const DAY: u64 = 60 * 60 * 24;
 
+/// the field order matters because of Ord derivation
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Candidate {
     status: Status,
@@ -42,7 +35,7 @@ struct LastRef(u64);
 impl PartialEq for LastRef {
     fn eq(&self, other: &Self) -> bool {
         match (self.levels(), other.levels()) {
-            (None, None) => dbg!(self.weeks()) == dbg!(other.weeks()),
+            (None, None) => self.weeks() == other.weeks(),
             (Some(a), Some(b)) => a == b,
             _ => false,
         }
@@ -151,17 +144,24 @@ impl Candidates {
 
     pub fn sort(&mut self) -> () {
         for (_, cs) in self.0.iter_mut() {
-            cs.sort_unstable()
+            // the performance should be fine
+            cs.sort_unstable();
+            cs.reverse();
         }
     }
 }
 
 impl Display for Candidates {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let alias_map = &crate::config::config().alias_map;
+        let alias_map = &config().alias_map;
+        let search_option = &config().search_option;
         for (prefix, cs) in self.0.iter() {
             let options = super::format::Options::new(prefix, alias_map);
-            let paths: Vec<Vec<_>> = cs.iter().map(Candidate::path_segs).collect();
+            let paths: Vec<Vec<_>> = cs
+                .iter()
+                .take(search_option.limit)
+                .map(Candidate::path_segs)
+                .collect();
             Tree::new((&paths).into(), options).print(true, f)?;
         }
         Ok(())

@@ -2,9 +2,9 @@ use clap::{arg, command, Args, Parser, Subcommand};
 use recentf_lib::{
     clean, config, database,
     search::Query,
-    tramp::{self, TrampPath},
+    tramp::{self},
 };
-use std::{collections::HashMap, path::PathBuf, str::FromStr};
+use std::{str::FromStr};
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -61,9 +61,9 @@ async fn main() {
         }
         Commands::Search { query: x } => {
             let query = Query::from_str(&x).unwrap();
-            let res = database::search(&mut conn, query).await.unwrap();
+            let mut res = database::search(&mut conn, query).await.unwrap();
+            res.sort();
             println!("{}",res);
-            // tramp::pretty_print(res);
         }
         Commands::Test => println!("test"),
         Commands::Clean => {

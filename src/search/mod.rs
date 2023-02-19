@@ -1,11 +1,12 @@
 mod candidates;
 mod format;
 use super::tramp;
-use anyhow::{anyhow, Context, Error, Result};
+use crate::config::config;
+use anyhow::{Error, Result};
 pub use candidates::{Candidate, Candidates, Status};
-use pathtrie::{node::Node, Tree};
+
 use serde::Deserialize;
-use std::{collections::HashMap, path::PathBuf, str::FromStr, time::Duration};
+use std::str::FromStr;
 
 #[derive(Debug, Default)]
 pub struct Query {
@@ -29,13 +30,25 @@ impl FromStr for Query {
 
     fn from_str(s: &str) -> Result<Self> {
         let mut res = Self::default();
+        let alias_map = &config().alias_map;
+        macro_rules! push {
+            ($v:expr, $seg:expr) => {
+                if !$seg.is_empty() {
+                    $v.push($seg.to_string())
+                }
+            };
+        }
+
         for seg in s.split(' ') {
             let mut chars = seg.chars();
             match chars.next() {
-                Some('/') => res.paths.push(chars.as_str().to_owned()),
-                // Some('@') if seg.len() > 1 => res.tramp_ids = None,
-                Some('@') if seg.len() > 1 => todo!(),
-                _ => res.names.push(seg.to_owned()),
+                Some('/') => push!(res.paths, chars.as_str()),
+                Some('@') => {
+                    let input = chars.as_str();
+                    let item = alias_map.matched_host(input).unwrap_or(input);
+                    push!(res.tramp_aliases, item)
+                }
+                _ => push!(res.names, seg),
             };
         }
         Ok(res)

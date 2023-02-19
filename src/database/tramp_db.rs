@@ -1,7 +1,5 @@
-use super::tramp::{self, TrampPath};
-use crate::search::Query;
 use anyhow::Result;
-use sqlx::{query, PgConnection, PgPool};
+use sqlx::{query, PgPool};
 
 pub async fn upsert(conn: &PgPool, prefix: &str) -> Result<i16> {
     let id = match try_find(conn, prefix).await? {

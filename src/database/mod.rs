@@ -1,16 +1,11 @@
 mod search;
 mod tramp_db;
 
-use super::tramp::{self, TrampPath};
-use crate::search::{Candidate, Candidates, Query, Status};
+use crate::search::Status;
 use anyhow::{Context, Result};
 pub use search::search;
-use sqlx::{query, Connection, PgConnection, PgPool};
-use std::{
-    collections::HashMap,
-    path::Path,
-    time::{SystemTime, UNIX_EPOCH},
-};
+use sqlx::{query, PgPool};
+use std::path::Path;
 
 pub async fn connect(db_path: &str) -> Result<PgPool> {
     PgPool::connect(db_path)

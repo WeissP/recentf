@@ -1,13 +1,7 @@
-use super::tramp::{self, TrampPath};
 use crate::search::{Candidate, Candidates, Query, Status};
-use anyhow::{Context, Result};
+use anyhow::Result;
 use itertools::Itertools;
-use sqlx::{query, Connection, PgConnection, PgPool};
-use std::{
-    collections::HashMap,
-    path::Path,
-    time::{SystemTime, UNIX_EPOCH},
-};
+use sqlx::{query, PgPool};
 
 macro_rules! new_candidate {
     ($record:expr) => {
