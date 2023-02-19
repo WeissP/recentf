@@ -9,7 +9,8 @@ use std::{env, path::PathBuf};
 pub struct Config {
     pub tramp_aliases: AliasMap,
     pub search: SearchOption,
-    pub filter: Option<FilterRules>,
+    #[serde(default)]
+    pub filter: FilterRules,
     pub database: Database,
 }
 

@@ -1,10 +1,6 @@
 use clap::{arg, command, Args, Parser, Subcommand};
-use recentf_lib::{
-    clean, config, database,
-    search::Query,
-    tramp::{self},
-};
-use std::{str::FromStr};
+use recentf_lib::{clean, config, database, search::Query, tramp};
+use std::str::FromStr;
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -17,6 +13,11 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Add(AddArgs),
+    Remove {
+        #[clap(value_parser, required = true)]
+        #[arg(help("the path in the form of emacs to be removed"))]
+        emacs_path: String,
+    },
     Search {
         #[clap(value_parser, required = true)]
         query: String,
@@ -59,11 +60,17 @@ async fn main() {
                 .unwrap()
             }
         }
+        Commands::Remove { emacs_path: p } => {
+            let (tramp_prefix, file_path) = tramp::split(&p);
+            database::change_deleted_flag(&mut conn, tramp_prefix, file_path, true)
+                .await
+                .unwrap();
+        }
         Commands::Search { query: x } => {
             let query = Query::from_str(&x).unwrap();
             let mut res = database::search(&mut conn, query).await.unwrap();
-            res.sort();
-            println!("{}",res);
+            res.reorgnize(&config::config().filter);
+            println!("{}", res);
         }
         Commands::Test => println!("test"),
         Commands::Clean => {

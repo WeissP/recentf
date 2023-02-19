@@ -67,3 +67,26 @@ UPDATE file SET status = $1
     .context("could not update status")?;
     Ok(())
 }
+
+pub async fn change_deleted_flag(
+    conn: &PgPool,
+    tramp_prefix: &str,
+    file_path: &str,
+    deleted: bool,
+) -> Result<()> {
+    if let Some(tramp_id) = tramp_db::try_find(conn, tramp_prefix).await? {
+        query!(
+            r#"
+UPDATE file SET deleted = $1
+ WHERE tramp_id = $2 AND fullpath like $3
+"#,
+            deleted,
+            tramp_id,
+            format!("{}%", file_path)
+        )
+        .execute(conn)
+        .await
+        .context("could not set file as deleted")?;
+    }
+    Ok(())
+}

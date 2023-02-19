@@ -29,7 +29,10 @@ where
         // the length of the level_stack is the depth of the current node
         let mut level_stack = Vec::with_capacity(30);
         level_stack.push(0);
-        for item in take(&mut self.root).into_iter() {
+        for item in take(&mut self.root)
+            .into_iter()
+            .filter(|x| !x.segments.is_empty())
+        {
             // it would happen if the last iterated node is a blatt
             // we need to find the level that matched the current node
             while *level_stack.last().unwrap() >= item.segments.len() {

@@ -1,4 +1,4 @@
-use crate::config::config;
+use crate::{clean::FilterRules, config::config};
 use anyhow::{anyhow, Result};
 use once_cell::sync::OnceCell;
 use pathtrie::Tree;
@@ -142,12 +142,23 @@ impl Candidates {
         self.0.get(id)
     }
 
-    pub fn sort(&mut self) -> () {
+    fn sort(&mut self) -> () {
         for (_, cs) in self.0.iter_mut() {
             // the performance should be fine
             cs.sort_unstable();
             cs.reverse();
         }
+    }
+
+    fn filter(&mut self, rules: &FilterRules) -> () {
+        for (_, cs) in self.0.iter_mut() {
+            cs.retain(|c| !rules.is_matched(c.full_path()))
+        }
+    }
+
+    pub fn reorgnize(&mut self, rules: &FilterRules) -> () {
+        self.filter(rules);
+        self.sort();
     }
 }
 
