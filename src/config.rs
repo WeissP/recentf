@@ -7,9 +7,9 @@ use std::{env, path::PathBuf};
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
-    pub alias_map: AliasMap,
-    pub search_option: SearchOption,
-    pub filter_rules: FilterRules,
+    pub tramp_aliases: AliasMap,
+    pub search: SearchOption,
+    pub filter: Option<FilterRules>,
     pub database: Database,
 }
 

@@ -153,8 +153,8 @@ impl Candidates {
 
 impl Display for Candidates {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let alias_map = &config().alias_map;
-        let search_option = &config().search_option;
+        let alias_map = &config().tramp_aliases;
+        let search_option = &config().search;
         for (prefix, cs) in self.0.iter() {
             let options = super::format::Options::new(prefix, alias_map);
             let paths: Vec<Vec<_>> = cs

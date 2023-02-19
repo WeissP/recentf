@@ -30,7 +30,7 @@ impl FromStr for Query {
 
     fn from_str(s: &str) -> Result<Self> {
         let mut res = Self::default();
-        let alias_map = &config().alias_map;
+        let alias_map = &config().tramp_aliases;
         macro_rules! push {
             ($v:expr, $seg:expr) => {
                 if !$seg.is_empty() {
