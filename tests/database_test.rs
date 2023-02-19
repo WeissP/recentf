@@ -1,6 +1,6 @@
 mod common;
 
-use anyhow::{Context, Result};
+use anyhow::Context;
 use common::{db, search};
 use recentf_lib::{
     database::{self, upsert},
