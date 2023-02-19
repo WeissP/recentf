@@ -30,11 +30,11 @@ pub(crate) use search;
 
 use recentf_lib::search::Candidates;
 
-pub fn paths_with_id(can: Candidates, id: i16) -> Vec<String> {
-    can.get(id)
+pub fn paths_with_id(can: Candidates, prefix: &str) -> Vec<String> {
+    can.get(prefix)
         .expect(&format!(
-            "candidates has no value on id: {}. Candidates:\n{:?}",
-            id, can
+            "candidates has no value on prefix: {}. Candidates:\n{:?}",
+            prefix, can
         ))
         .iter()
         .map(|x| x.full_path().to_string())

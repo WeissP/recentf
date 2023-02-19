@@ -1,6 +1,6 @@
 use std::{ffi::OsStr, path::Path};
 
-use crate::config::config;
+
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 

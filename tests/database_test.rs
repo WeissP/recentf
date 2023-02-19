@@ -13,18 +13,18 @@ fn search_test(pool: PgPool) -> () {
     db::insert_mock(&pool).await;
 
     let res = search::search!(&pool, [], [], []);
-    assert_eq!(search::paths_with_id(res, 0), db::mock_data()[0].1);
+    assert_eq!(search::paths_with_id(res, ""), db::mock_data()[0].1);
 
     let res = search::search!(&pool, [], ["a"], []);
-    assert_eq!(search::paths_with_id(res, 0), ["/a/a", "/a/file"]);
+    assert_eq!(search::paths_with_id(res, ""), ["/a/a", "/a/file"]);
 
     let res = search::search!(&pool, [], ["a"], ["file"]);
-    assert_eq!(search::paths_with_id(res, 0), ["/a/file"]);
+    assert_eq!(search::paths_with_id(res, ""), ["/a/file"]);
 
     let query = search::query!(["1"], ["a"], ["file"]);
     let res = database::search(&pool, query).await.unwrap();
-    assert!(res.get(0).is_none());
-    assert_eq!(search::paths_with_id(res, 1), ["/a1/file"]);
+    assert!(res.get("").is_none());
+    assert_eq!(search::paths_with_id(res, "1"), ["/a1/file"]);
 }
 
 // we ignore it because it needs to wait a long time for testing last_ref
