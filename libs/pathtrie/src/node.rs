@@ -1,5 +1,4 @@
-use super::iter::Iter;
-use super::iter::IterItem;
+use super::iter::{Iter, IterItem};
 use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
@@ -14,6 +13,16 @@ where
     pub children: Vec<Node<'a, T>>,
 }
 
+// impl<'a> FromIterator<Vec<&'a str>> for Node<'a, ()> {
+//     fn from_iter<It: IntoIterator<Item = Vec<&'a str>>>(iter: It) -> Self {
+//         let mut root = Node::default();
+//         for v in iter {
+//             root.insert(v, None);
+//         }
+//         root
+//     }
+// }
+
 impl<'a, T> Default for Node<'a, T>
 where
     T: Serialize,
@@ -27,8 +36,8 @@ where
     }
 }
 
-impl<'a> From<Vec<&'a Vec<&'a str>>> for Node<'a, ()> {
-    fn from(vv: Vec<&'a Vec<&'a str>>) -> Self {
+impl<'a> From<&'a Vec<Vec<&'a str>>> for Node<'a, ()> {
+    fn from(vv: &'a Vec<Vec<&'a str>>) -> Self {
         let mut root = Node::default();
         for v in vv {
             root.insert(v, None);
@@ -58,7 +67,7 @@ where
         !self.children.is_empty()
     }
 
-    fn insert_helper(&mut self, segs: &'a Vec<&'a str>, val: Option<T>, to: usize) {
+    fn insert_helper(&mut self, segs: &'a [&'a str], val: Option<T>, to: usize) {
         if self.segments.is_empty() {
             self.segments = &segs[..=to];
         }
@@ -89,7 +98,7 @@ where
         };
     }
 
-    pub fn insert(&mut self, full_path: &'a Vec<&'a str>, val: Option<T>) {
+    pub fn insert(&mut self, full_path: &'a [&'a str], val: Option<T>) {
         assert!(!full_path.is_empty());
         self.insert_helper(full_path, val, 0);
     }

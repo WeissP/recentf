@@ -38,9 +38,10 @@ pub async fn upsert<'a, 'b>(
     let full_path = p.to_str().context("invalid path")?;
     query!(
         r#"
-INSERT INTO file(tramp_id,fullpath,dirpath,filename,    last_ref              , freq, status) VALUES
-                ($1      ,      $2,     $3,      $4, extract(epoch from now()),    1, 2 )
-ON CONFLICT(tramp_id,fullpath) DO UPDATE SET last_ref=EXCLUDED.last_ref, freq=file.freq+1, status=LEAST(file.status, 1)
+INSERT INTO file(tramp_id,fullpath,dirpath,filename,    last_ref              , freq, deleted, status) VALUES
+                ($1      ,      $2,     $3,      $4, extract(epoch from now()),    1, false  , 2 )
+ON CONFLICT(tramp_id,fullpath)
+DO UPDATE SET last_ref=EXCLUDED.last_ref, freq=file.freq+1, deleted=false, status=file.status
 "#,
         id,
         full_path,

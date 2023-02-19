@@ -4,10 +4,13 @@ use pathtrie::Tree;
 use std::{
     cmp::Ordering,
     collections::HashMap,
-    path::PathBuf,
+    fmt::Display,
+    path::{Path, PathBuf},
     str::FromStr,
     time::{Duration, SystemTime},
 };
+
+use crate::tramp;
 
 const DAY: u64 = 60 * 60 * 24;
 
@@ -22,7 +25,6 @@ pub struct Candidate {
 #[derive(sqlx::Type, Debug, Clone, Copy, PartialEq, Eq, Ord)]
 #[repr(i32)]
 pub enum Status {
-    Deleted = 0,
     Filtered = 1,
     Normal = 2,
     Favourite = 3,
@@ -113,32 +115,38 @@ impl Candidate {
             full_path,
         }
     }
+
+    fn path_segs(&self) -> Vec<&str> {
+        Path::new(&self.full_path[1..])
+            .iter()
+            .map(|x| x.to_str().unwrap())
+            .collect()
+    }
 }
 
 #[derive(Default, Debug)]
-pub struct Candidates(HashMap<i16, Vec<Candidate>>);
+pub struct Candidates(HashMap<String, Vec<Candidate>>);
 
 impl Candidates {
-    pub fn single(id: i16, can: Vec<Candidate>) -> Self {
+    pub fn single(id: String, can: Vec<Candidate>) -> Self {
         let mut hm = HashMap::new();
         hm.insert(id, can);
         Self(hm)
     }
 
-    pub fn insert(&mut self, id: i16, cs: Vec<Candidate>) -> Result<()> {
+    pub fn insert(&mut self, id: String, cs: Vec<Candidate>) -> Result<()> {
         if let Some(old) = self.0.insert(id, cs) {
             Err(anyhow!(
-                "Candidates already has value {:?} of id {} while inserting new",
+                "Candidates already has value {:?} while inserting new",
                 old,
-                id,
             ))
         } else {
             Ok(())
         }
     }
 
-    pub fn get(&self, id: i16) -> Option<&Vec<Candidate>> {
-        self.0.get(&id)
+    pub fn get(&self, id: &str) -> Option<&Vec<Candidate>> {
+        self.0.get(id)
     }
 
     pub fn sort(&mut self) -> () {
@@ -146,16 +154,18 @@ impl Candidates {
             cs.sort_unstable()
         }
     }
+}
 
-    pub fn paths(&self) -> impl Iterator<Item = (&i16, Vec<&str>)> {
-        self.0
-            .iter()
-            .map(|(id, cs)| (id, cs.iter().map(|x| x.full_path()).collect()))
+impl Display for Candidates {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let alias_map = &crate::config::config().alias_map;
+        for (prefix, cs) in self.0.iter() {
+            let options = super::format::Options::new(prefix, alias_map);
+            let paths: Vec<Vec<_>> = cs.iter().map(Candidate::path_segs).collect();
+            Tree::new((&paths).into(), options).print(true, f)?;
+        }
+        Ok(())
     }
-
-//     pub fn paths_segs(&self) -> impl Iterator<Item = (&i16, Vec<&Vec<&str>>)> {
-// todo!()
-// }
 }
 
 #[cfg(test)]

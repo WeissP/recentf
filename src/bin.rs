@@ -62,6 +62,7 @@ async fn main() {
         Commands::Search { query: x } => {
             let query = Query::from_str(&x).unwrap();
             let res = database::search(&mut conn, query).await.unwrap();
+            println!("{}",res);
             // tramp::pretty_print(res);
         }
         Commands::Test => println!("test"),

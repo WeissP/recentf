@@ -21,6 +21,10 @@ impl<'a, T, F: Format> Tree<'a, T, F>
 where
     T: Serialize,
 {
+    pub fn new(root: Node<'a, T>, fmt: F) -> Self {
+        Self { root, fmt }
+    }
+
     pub fn print(mut self, compressed: bool, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // the length of the level_stack is the depth of the current node
         let mut level_stack = Vec::with_capacity(30);

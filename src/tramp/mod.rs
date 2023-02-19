@@ -1,4 +1,7 @@
+mod alias;
+pub use alias::{Alias, AliasMap, Host};
 use anyhow::{anyhow, Context, Error, Result};
+use bimap::BiBTreeMap;
 use std::{collections::HashMap, fmt::Display, path::PathBuf, str::FromStr};
 
 /// split tramp_path to tramp_prefix and file_path
@@ -29,10 +32,19 @@ impl FromStr for TrampPath {
 #[derive(Clone, Debug)]
 pub struct Prefix(Vec<Piece>);
 
+impl Prefix {
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+}
+}
+
 impl FromStr for Prefix {
     type Err = Error;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        if s.is_empty() {
+            return Ok(Self(Vec::new()));
+        }
         let res = s
             .split('|')
             .map(Piece::from_str)
@@ -53,7 +65,7 @@ impl Display for Prefix {
 pub struct Piece {
     method: Method,
     user: String,
-    host: String,
+    host: Host,
 }
 
 impl FromStr for Piece {
@@ -103,13 +115,6 @@ impl Display for Method {
         };
         f.write_str(s)
     }
-}
-
-pub type Alias = String;
-pub type AliasMap = HashMap<Alias, String>;
-
-pub fn pretty_print(paths: Vec<TrampPath>) -> () {
-    todo!()
 }
 
 #[cfg(test)]

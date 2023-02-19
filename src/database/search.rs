@@ -53,7 +53,7 @@ ORDER BY status
     .fetch_all(conn)
     .await?;
     let candidates = records.into_iter().map(|x| new_candidate!(x)).collect();
-    Ok(Candidates::single(0, candidates))
+    Ok(Candidates::single(String::new(), candidates))
 }
 
 async fn search_with_tramp(
@@ -64,7 +64,7 @@ async fn search_with_tramp(
 ) -> Result<Candidates> {
     let records = query!(
         r#"
-SELECT tramp_id, fullpath, last_ref, freq, status as "status: Status"
+SELECT tramp_prefix, fullpath, last_ref, freq, status as "status: Status"
 FROM file INNER JOIN tramp ON file.tramp_id = tramp.id
 WHERE tramp_id != 0
 AND deleted = false
@@ -82,9 +82,9 @@ ORDER BY tramp.id, status
     .await?;
 
     let mut candidates = Candidates::default();
-    for (id, group) in &records.into_iter().group_by(|e| e.tramp_id) {
+    for (prefix, group) in &records.into_iter().group_by(|e| e.tramp_prefix.to_string()) {
         candidates
-            .insert(id, group.map(|x| new_candidate!(x)).collect())
+            .insert(prefix, group.map(|x| new_candidate!(x)).collect())
             .expect("id conflits during search_with_tramp");
     }
     Ok(candidates)
