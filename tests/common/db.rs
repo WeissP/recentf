@@ -1,5 +1,5 @@
 use anyhow::Result;
-use recentf_lib::database::upsert;
+use recentf::database::upsert;
 use sqlx::{query, PgPool};
 
 pub fn mock_data() -> Vec<(&'static str, Vec<&'static str>)> {

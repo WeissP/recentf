@@ -1,5 +1,5 @@
 use clap::{arg, command, Args, Parser, Subcommand};
-use recentf_lib::{clean, config, database, search::Query, tramp};
+use recentf::{clean, config, database, search::Query, tramp};
 use std::str::FromStr;
 
 #[derive(Parser)]
@@ -55,7 +55,7 @@ async fn main() {
                     &mut conn,
                     tramp_prefix,
                     file_path,
-                    recentf_lib::search::Status::Favourite,
+                    recentf::search::Status::Favourite,
                 )
                 .await
                 .unwrap()

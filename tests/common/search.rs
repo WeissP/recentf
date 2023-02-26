@@ -28,7 +28,7 @@ macro_rules! search {
 }
 pub(crate) use search;
 
-use recentf_lib::search::Candidates;
+use recentf::search::Candidates;
 
 pub fn paths_with_id(can: Candidates, prefix: &str) -> Vec<String> {
     can.get(prefix)

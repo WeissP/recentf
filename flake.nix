@@ -5,12 +5,13 @@
     nixpkgs.follows = "cargo2nix/nixpkgs";
   };
 
-  outputs = inputs: with inputs;
+  outputs = inputs:
+    with inputs;
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [cargo2nix.overlays.default];
+          overlays = [ cargo2nix.overlays.default ];
         };
 
         rustPkgs = pkgs.rustBuilder.makePackageSet {
@@ -20,10 +21,8 @@
 
       in rec {
         packages = {
-          # replace hello-world with your package name
-          recentf = (rustPkgs.workspace.recentf {});
+          recentf = (rustPkgs.workspace.recentf { }).bin;
           default = packages.recentf;
         };
-      }
-    );
+      });
 }

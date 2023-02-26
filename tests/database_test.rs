@@ -2,7 +2,7 @@ mod common;
 
 use anyhow::Context;
 use common::{db, search};
-use recentf_lib::{
+use recentf::{
     database::{self, upsert},
     search::Query,
 };
