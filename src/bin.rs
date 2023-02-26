@@ -43,6 +43,7 @@ struct AddArgs {
 async fn main() {
     let cli = Cli::parse();
     let mut conn = database::connect(config::database_path()).await.unwrap();
+    database::migrate(&conn).await.unwrap();
     match cli.command {
         Commands::Add(arg) => {
             let (tramp_prefix, file_path) = tramp::split(&arg.emacs_path);

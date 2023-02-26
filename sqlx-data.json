@@ -1,0 +1,171 @@
+{
+  "db": "PostgreSQL",
+  "11b52a0d4143f15341b228bfadf3d500e47db18b9460ec5a2abe67cf1d2ea5f9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "fullpath",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "last_ref",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "freq",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "status: Status",
+          "ordinal": 3,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "TextArray",
+          "TextArray"
+        ]
+      }
+    },
+    "query": "\nSELECT fullpath, last_ref, freq, status as \"status: Status\"\nFROM file\nWHERE tramp_id = 0\nAND deleted = false\nAND status >= 2\nAND dirpath ILIKE all ($1::text[])\nAND filename ILIKE all ($2::text[])\nORDER BY status\n"
+  },
+  "312dec7dd223773313037599e23df8a55972b0ddff2da67b250cc11a4e77425a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\nSELECT id\nFROM tramp\nWHERE tramp_prefix = $1\n"
+  },
+  "44fe6c3d953e1bcc6672b121bec8bc3783343b2e26d7f9c4d3038c382f19d72e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Int2",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nUPDATE file SET deleted = $1\n WHERE tramp_id = $2 AND fullpath like $3\n"
+  },
+  "616f3c2a9ab87d96334f4123b5a819f9a68c3d1b2beed0d74f2362dabd400b16": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nINSERT INTO file(tramp_id,fullpath,dirpath,filename,    last_ref              , freq, deleted, status) VALUES\n                ($1      ,      $2,     $3,      $4, extract(epoch from now()),    1, false  , 2 )\nON CONFLICT(tramp_id,fullpath)\nDO UPDATE SET last_ref=EXCLUDED.last_ref, freq=file.freq+1, deleted=false, status=file.status\n"
+  },
+  "82484d3e3abbeac21d24f0d5a629019731c9f9d63c26ce3ef4446b76eab7b56b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int2",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nUPDATE file SET status = $1\n WHERE tramp_id = $2 AND fullpath = $3\n"
+  },
+  "9f45a6ebb1731492739164749c85142b06096575b3097b74b63a5b24b8e60bea": {
+    "describe": {
+      "columns": [
+        {
+          "name": "tramp_prefix",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "fullpath",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "last_ref",
+          "ordinal": 2,
+          "type_info": "Int8"
+        },
+        {
+          "name": "freq",
+          "ordinal": 3,
+          "type_info": "Int4"
+        },
+        {
+          "name": "status: Status",
+          "ordinal": 4,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "TextArray",
+          "TextArray",
+          "TextArray"
+        ]
+      }
+    },
+    "query": "\nSELECT tramp_prefix, fullpath, last_ref, freq, status as \"status: Status\"\nFROM file INNER JOIN tramp ON file.tramp_id = tramp.id\nWHERE tramp_id != 0\nAND deleted = false\nAND status >= 2\nAND dirpath ILIKE all ($1::text[])\nAND filename ILIKE all ($2::text[])\nAND tramp_prefix ILIKE all ($3::text[])\nORDER BY tramp.id, status\n"
+  },
+  "a6fce3358c8805e791346e1618726b460dbcfcae4c35b31d1dca7273beae8e56": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\nINSERT INTO tramp (tramp_prefix)\nVALUES ($1) RETURNING id;\n"
+  }
+}

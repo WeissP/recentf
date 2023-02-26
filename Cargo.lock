@@ -232,6 +232,9 @@ name = "either"
 version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7fcaabb2fef8c910e7f4c7ce9f67a1283a1715879a7c230ca9d6d1ae31f16d91"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "errno"
@@ -757,7 +760,7 @@ dependencies = [
 
 [[package]]
 name = "recentf"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "bimap",
@@ -1039,9 +1042,12 @@ dependencies = [
  "dotenvy",
  "either",
  "heck",
+ "hex",
  "once_cell",
  "proc-macro2",
  "quote",
+ "serde",
+ "serde_json",
  "sha2",
  "sqlx-core",
  "sqlx-rt",

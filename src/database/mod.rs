@@ -4,8 +4,15 @@ mod tramp_db;
 use crate::search::Status;
 use anyhow::{Context, Result};
 pub use search::search;
+use sqlx::migrate::Migrator;
 use sqlx::{query, PgPool};
 use std::path::Path;
+
+static MIGRATOR: Migrator = sqlx::migrate!();
+
+pub async fn migrate(conn: &PgPool) -> Result<()> {
+    MIGRATOR.run(conn).await.context("could not migrate")
+}
 
 pub async fn connect(db_path: &str) -> Result<PgPool> {
     PgPool::connect(db_path)

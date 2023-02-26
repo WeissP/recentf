@@ -12,15 +12,13 @@ pub struct AliasMap(BiBTreeMap<Alias, Host>);
 
 impl AliasMap {
     pub fn matched_host<'a, 'b>(&'a self, alias: &'b str) -> Option<&'a str> {
-        self.0
-            .iter()
-            .find_map(|(k, v)| {
-                if k.contains(alias) {
-                    Some(v.as_str())
-                } else {
-                    None
-                }
-            })
+        self.0.iter().find_map(|(k, v)| {
+            if k.contains(alias) {
+                Some(v.as_str())
+            } else {
+                None
+            }
+        })
     }
 }
 
