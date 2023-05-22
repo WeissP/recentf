@@ -19,10 +19,14 @@
           rustc = toolchain;
         };
 
-      in with pkgs; {
-        defaultPackage = naersk'.buildPackage { src = ./.; };
-        devShells.default = mkShell {
-          buildInputs = [ openssl pkg-config toolchain rust-analyzer ];
+      in {
+        packages = rec {
+          default = naersk'.buildPackage { src = ./.; };
+          recentf = default;
         };
+        devShells.default = with pkgs;
+          mkShell {
+            buildInputs = [ openssl pkg-config toolchain rust-analyzer ];
+          };
       });
 }
