@@ -75,7 +75,7 @@ async fn main() {
         }
         Commands::Test => println!("test"),
         Commands::Clean => {
-            clean::clean().unwrap();
+            clean::clean(&mut conn).await.unwrap();
         }
     }
 }

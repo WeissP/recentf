@@ -2,6 +2,9 @@ use std::{ffi::OsStr, path::Path};
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
+
+use crate::{database, search::Query};
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(transparent)]
@@ -46,7 +49,9 @@ impl FilterRule {
         let prefix = try_unwrap(&self.name_prefix);
         let suffix = try_unwrap(&self.name_suffix);
         if prefix.is_some() | suffix.is_some() {
-            if let Some(Some(file_name)) = p.file_name().map(|x| x.to_str()) {
+            if let Some(Some(file_name)) =
+                p.file_name().map(|x| x.to_str())
+            {
                 if let Some(name_prefix) = prefix {
                     if !file_name.starts_with(name_prefix) {
                         return false;
@@ -64,6 +69,21 @@ impl FilterRule {
     }
 }
 
-pub fn clean() -> Result<()> {
-    todo!()
+pub async fn clean(conn: &PgPool) -> Result<()> {
+    let cands = database::search(conn, Query::default()).await?;
+    if let Some(cands) = cands.get("") {
+        for cand in cands {
+            if !Path::new(cand.full_path()).exists() {
+                database::change_deleted_flag(
+                    conn,
+                    "",
+                    cand.full_path(),
+                    true,
+                )
+                .await?;
+            }
+        }
+    }
+
+    Ok(())
 }
