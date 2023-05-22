@@ -1,42 +1,28 @@
 {
+  description = "A devShell example";
+
   inputs = {
-    cargo2nix.url = "github:cargo2nix/cargo2nix/unstable";
-    flake-utils.follows = "cargo2nix/flake-utils";
-    nixpkgs.follows = "cargo2nix/nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    rust-overlay.url = "github:oxalica/rust-overlay";
+    flake-utils.url = "github:numtide/flake-utils";
+    naersk.url = "github:nix-community/naersk";
   };
 
-  outputs = inputs:
-    with inputs;
+  outputs = { self, nixpkgs, naersk, rust-overlay, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [ cargo2nix.overlays.default ];
+        overlays = [ (import rust-overlay) ];
+        pkgs = import nixpkgs { inherit system overlays; };
+        toolchain = pkgs.rust-bin.stable.latest.default;
+        naersk' = pkgs.callPackage naersk {
+          cargo = toolchain;
+          rustc = toolchain;
         };
 
-        rustPkgs = pkgs.rustBuilder.makePackageSet {
-          rustVersion = "1.66.1";
-          packageFun = import ./Cargo.nix;
-
-          packageOverrides = pkgs:
-            pkgs.rustBuilder.overrides.all ++ [
-              (pkgs.rustBuilder.rustLib.makeOverride {
-                name = "sqlx-macros";
-                overrideAttrs = drv: {
-                  propagatedBuildInputs = with pkgs;
-                    drv.propagatedBuildInputs or [ ]
-                    ++ (lib.optional stdenv.isDarwin
-                      (with darwin.apple_sdk.frameworks;
-                        [ SystemConfiguration ]));
-                };
-              })
-            ];
-        };
-
-      in rec {
-        packages = {
-          recentf = (rustPkgs.workspace.recentf { }).bin;
-          default = packages.recentf;
+      in with pkgs; {
+        defaultPackage = naersk'.buildPackage { src = ./.; };
+        devShells.default = mkShell {
+          buildInputs = [ openssl pkg-config toolchain rust-analyzer ];
         };
       });
 }
