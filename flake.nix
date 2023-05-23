@@ -21,7 +21,12 @@
 
       in {
         packages = rec {
-          default = naersk'.buildPackage { src = ./.; };
+          default = with pkgs;
+            naersk'.buildPackage {
+              src = ./.;
+              nativeBuildInputs = [ ] ++ (lib.optional stdenv.isDarwin
+                (with darwin.apple_sdk.frameworks; [ SystemConfiguration ]));
+            };
           recentf = default;
         };
         devShells.default = with pkgs;
