@@ -8,8 +8,17 @@
     naersk.url = "github:nix-community/naersk";
   };
 
-  outputs = { self, nixpkgs, naersk, rust-overlay, flake-utils, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      naersk,
+      rust-overlay,
+      flake-utils,
+      ...
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         overlays = [ (import rust-overlay) ];
         pkgs = import nixpkgs { inherit system overlays; };
@@ -19,19 +28,43 @@
           rustc = toolchain;
         };
 
-      in {
+      in
+      {
         packages = rec {
-          default = with pkgs;
+          default =
+            with pkgs;
             naersk'.buildPackage {
               src = ./.;
-              nativeBuildInputs = [ ] ++ (lib.optional stdenv.isDarwin
-                (with darwin.apple_sdk.frameworks; [ SystemConfiguration ]));
+              nativeBuildInputs =
+                [ ] ++ (lib.optional stdenv.isDarwin (with darwin.apple_sdk.frameworks; [ SystemConfiguration ]));
             };
           recentf = default;
         };
-        devShells.default = with pkgs;
+        devShells.default =
+          with pkgs;
           mkShell {
-            buildInputs = [ openssl pkg-config toolchain rust-analyzer ];
+            buildInputs = [
+              openssl
+              pkg-config
+              (lib.hiPrio (
+                rust-bin.stable.latest.minimal.override {
+                  extensions = [
+                    "rust-docs"
+                    "rust-analyzer"
+                    "clippy"
+                  ];
+                }
+              ))
+              (rust-bin.selectLatestNightlyWith (
+                toolchain:
+                toolchain.minimal.override {
+                  extensions = [
+                    "rustfmt"
+                  ];
+                }
+              ))
+            ];
           };
-      });
+      }
+    );
 }

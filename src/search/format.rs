@@ -22,12 +22,7 @@ impl<'a> pathtrie::format::Format for Options<'a> {
         static PREFIX: OnceCell<String> = OnceCell::new();
         PREFIX.get_or_init(|| {
             tramp::Prefix::from_str(&self.tramp_prefix)
-                .with_context(|| {
-                    format!(
-                        "could not parse tramp prefix: {}",
-                        self.tramp_prefix
-                    )
-                })
+                .with_context(|| format!("could not parse tramp prefix: {}", self.tramp_prefix))
                 .unwrap()
                 .show_as_aliases(self.alias_map)
         })
@@ -41,11 +36,7 @@ impl<'a> pathtrie::format::Format for Options<'a> {
         50
     }
 
-    fn suffix(
-        &self,
-        segs: pathtrie::Segs,
-        _level_stack: &Vec<usize>,
-    ) -> String {
+    fn suffix(&self, segs: pathtrie::Segs, _level_stack: &Vec<usize>) -> String {
         let mut res = String::new();
         res.push_str("』𝔰𝔢𝔭『");
         if !self.tramp_prefix.is_empty() {
