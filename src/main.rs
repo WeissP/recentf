@@ -81,7 +81,7 @@ async fn main() {
             let query = Query::from_str(&query).unwrap();
             let mut res = database::search(&mut conn, query).await.unwrap();
             res.reorgnize(&config::config().filter);
-            println!("{}", res.all_paths().join(","));
+            println!("{}", res.all_paths().join("\n"));
         }
         Commands::Test => println!("test"),
         Commands::Clean => {
