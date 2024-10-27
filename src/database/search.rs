@@ -13,8 +13,8 @@ macro_rules! new_candidate {
         )
     };
 }
-
-pub async fn search(conn: &PgPool, q: Query) -> Result<Candidates> {
+ 
+pub async fn search(conn: &PgPool, q: Query) -> Result<Candidates> { 
     let paths = wrap_like(q.paths);
     let names = wrap_like(q.names);
     let aliases = wrap_like(q.tramp_aliases);

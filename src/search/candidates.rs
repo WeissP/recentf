@@ -160,6 +160,10 @@ impl Candidates {
         self.filter(rules);
         self.sort();
     }
+
+    pub fn all_paths(&self) -> Vec<&str> {
+        self.0.values().flatten().map(|v| v.full_path()).collect()
+    }
 }
 
 impl Display for Candidates {

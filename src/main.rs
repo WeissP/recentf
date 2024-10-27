@@ -18,6 +18,10 @@ enum Commands {
         #[arg(help("the path in the form of emacs to be removed"))]
         emacs_path: String,
     },
+    Tree {
+        #[clap(value_parser, required = true)]
+        query: String,
+    },
     Search {
         #[clap(value_parser, required = true)]
         query: String,
@@ -67,11 +71,17 @@ async fn main() {
                 .await
                 .unwrap();
         }
-        Commands::Search { query: x } => {
+        Commands::Tree { query: x } => {
             let query = Query::from_str(&x).unwrap();
             let mut res = database::search(&mut conn, query).await.unwrap();
             res.reorgnize(&config::config().filter);
             println!("{}", res);
+        }
+        Commands::Search { query } => {
+            let query = Query::from_str(&query).unwrap();
+            let mut res = database::search(&mut conn, query).await.unwrap();
+            res.reorgnize(&config::config().filter);
+            println!("{}", res.all_paths().join(","));
         }
         Commands::Test => println!("test"),
         Commands::Clean => {

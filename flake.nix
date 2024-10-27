@@ -46,10 +46,13 @@
             buildInputs = [
               openssl
               pkg-config
+              bacon
+              sqlx-cli
               (lib.hiPrio (
                 rust-bin.stable.latest.minimal.override {
                   extensions = [
                     "rust-docs"
+                    "rust-src"
                     "rust-analyzer"
                     "clippy"
                   ];
