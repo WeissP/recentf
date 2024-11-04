@@ -71,7 +71,7 @@ pub async fn clean(conn: &PgPool) -> Result<()> {
     let cands = database::search(conn, Query::default()).await?;
     if let Some(cands) = cands.get("") {
         for cand in cands {
-            if !Path::new(cand.full_path()).exists() {
+            if !Path::new(cand.full_path()).is_file() {
                 database::change_deleted_flag(conn, "", cand.full_path(), true).await?;
             }
         }

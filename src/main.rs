@@ -1,6 +1,6 @@
 use clap::{arg, command, Args, Parser, Subcommand};
 use recentf::{clean, config, database, search::Query, tramp};
-use std::str::FromStr;
+use std::{path::Path, str::FromStr};
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -51,6 +51,10 @@ async fn main() {
     match cli.command {
         Commands::Add(arg) => {
             let (tramp_prefix, file_path) = tramp::split(&arg.emacs_path);
+            // TODO: doesn work for tramp
+            if !Path::new(file_path).is_file() {
+                return;
+            }
             database::upsert(&mut conn, tramp_prefix, file_path)
                 .await
                 .unwrap();
