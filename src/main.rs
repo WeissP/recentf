@@ -51,13 +51,10 @@ async fn main() {
     match cli.command {
         Commands::Add(arg) => {
             let (tramp_prefix, file_path) = tramp::split(&arg.emacs_path);
-            // TODO: doesn work for tramp
-            if !Path::new(file_path).is_file() {
-                return;
-            }
-            database::upsert(&mut conn, tramp_prefix, file_path)
+            let (_, inserted_path) = database::upsert(&mut conn, tramp_prefix, file_path)
                 .await
                 .unwrap();
+            println!("Path [{}] inserted", inserted_path);
             if arg.favourite {
                 database::change_status(
                     &mut conn,

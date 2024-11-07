@@ -2,7 +2,7 @@ mod search;
 mod tramp_db;
 
 use crate::search::Status;
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 pub use search::search;
 use sqlx::{migrate::Migrator, query, PgPool};
 use std::path::Path;
@@ -25,7 +25,10 @@ pub async fn upsert<'a, 'b>(
     file_path: &'b str,
 ) -> Result<(i16, &'b str)> {
     let id = tramp_db::upsert(conn, tramp_prefix).await?;
-    let p = Path::new(file_path);
+    let p = std::fs::canonicalize(file_path).context("invalid path")?;
+    if !p.is_file() {
+        bail!("Given path is not a file");
+    }
     let file_name = p
         .file_name()
         .context("path must contain file name")?
