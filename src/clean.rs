@@ -1,6 +1,7 @@
 use std::{ffi::OsStr, path::Path};
 
 use anyhow::Result;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
@@ -22,6 +23,8 @@ pub struct FilterRule {
     pub ext: Option<String>,
     pub name_prefix: Option<String>,
     pub name_suffix: Option<String>,
+    #[serde(with = "serde_regex", default)]
+    pub name_regex: Option<Regex>,
 }
 
 fn try_unwrap(c: &Option<String>) -> Option<&str> {
@@ -48,8 +51,8 @@ impl FilterRule {
 
         let prefix = try_unwrap(&self.name_prefix);
         let suffix = try_unwrap(&self.name_suffix);
-        if prefix.is_some() | suffix.is_some() {
-            if let Some(Some(file_name)) = p.file_name().map(|x| x.to_str()) {
+        if prefix.is_some() || suffix.is_some() {
+            if let Some(file_name) = p.file_name().and_then(|x| x.to_str()) {
                 if let Some(name_prefix) = prefix {
                     if !file_name.starts_with(name_prefix) {
                         return false;
@@ -60,10 +63,23 @@ impl FilterRule {
                         return false;
                     }
                 }
+            } else {
+                return false;
             }
         }
 
-        return true;
+        // Regex check using pre-compiled pattern
+        if let Some(re) = &self.name_regex {
+            if let Some(false) = p
+                .file_name()
+                .and_then(|x| x.to_str())
+                .map(|n| re.is_match(n))
+            {
+                return false;
+            }
+        }
+
+        true
     }
 }
 
